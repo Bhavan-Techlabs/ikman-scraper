@@ -12,6 +12,7 @@ A Python web scraper that extracts house-for-sale listings from [ikman.lk](https
 - **Duplicate detection** -- skips ads already in the sheet by URL match or 90%+ description text similarity (catches reposted ads with new URLs)
 - **Google Sheets output** -- auto-creates sheet tabs, formats headers, sorts by posted date, and keeps rows compact
 - **Clean mode** -- option to clear all sheets and start fresh
+- **GitHub Actions support** -- automate scraping on a schedule (e.g., every hour) with zero infrastructure
 
 ## How It Works
 
@@ -111,6 +112,49 @@ Clears all sheet data before scraping.
 python main.py --config my_config.yaml
 ```
 
+## Automated Scraping with GitHub Actions
+
+This project includes a GitHub Actions workflow that can run the scraper automatically on a schedule -- no server required.
+
+### How it works
+
+The included `.github/workflows/scrape.yml` workflow runs the scraper every hour using a cron schedule. It can also be triggered manually from the **Actions** tab in your GitHub repository.
+
+### Setup
+
+1. Fork or push this repository to GitHub (public repos get unlimited free Actions minutes)
+2. Add two **repository secrets** under **Settings > Secrets and variables > Actions**:
+   - `GOOGLE_CREDENTIALS` -- the full contents of your `credentials.json` file
+   - `CONFIG_YAML` -- the full contents of your `config.yaml` file
+3. That's it -- the workflow will run automatically every hour
+
+You can also set the secrets via the CLI:
+
+```bash
+gh secret set GOOGLE_CREDENTIALS < credentials.json
+gh secret set CONFIG_YAML < config.yaml
+```
+
+### Manual trigger
+
+```bash
+gh workflow run scrape.yml
+```
+
+Or click **Run workflow** from the Actions tab on GitHub.
+
+### Adjusting the schedule
+
+Edit the cron expression in `.github/workflows/scrape.yml`:
+
+```yaml
+on:
+  schedule:
+    - cron: '0 * * * *'    # Every hour
+    # - cron: '0 */6 * * *'  # Every 6 hours
+    # - cron: '0 8 * * *'    # Daily at 8am UTC
+```
+
 ## Configuration
 
 See `config.example.yaml` for all options:
@@ -143,6 +187,8 @@ urls:
 ## Project Structure
 
 ```
+├── .github/workflows/
+│   └── scrape.yml          # GitHub Actions workflow (hourly cron)
 ├── main.py                 # CLI entry point
 ├── scraper.py              # Page fetching, JSON extraction, pagination
 ├── data_processor.py       # Data normalization and row building
