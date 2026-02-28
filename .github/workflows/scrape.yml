@@ -24,10 +24,14 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Write credentials
-        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: printenv GOOGLE_CREDENTIALS > credentials.json
 
       - name: Write config
-        run: echo '${{ secrets.CONFIG_YAML }}' > config.yaml
+        env:
+          CONFIG_YAML: ${{ secrets.CONFIG_YAML }}
+        run: printenv CONFIG_YAML > config.yaml
 
       - name: Run scraper
         run: python main.py
