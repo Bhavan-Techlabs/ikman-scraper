@@ -6,15 +6,20 @@ credentials_path: "credentials.json"
 
 # URLs to scrape (each gets its own sheet tab named after the location)
 urls:
-  - "https://ikman.lk/en/ads/maharagama/houses-for-sale"
-  - "https://ikman.lk/en/ads/boralesgamuwa/houses-for-sale"
+  - "https://ikman.lk/en/ads/piliyandala/houses-for-sale"
   - "https://ikman.lk/en/ads/ja-ela/houses-for-sale"
+  - "https://ikman.lk/en/ads/kandy/houses-for-sale"
+  - "https://ikman.lk/en/ads/wattala/houses-for-sale"
+  - "https://ikman.lk/en/ads/dehiwala/houses-for-sale"
+  - "https://ikman.lk/en/ads/colombo/houses-for-sale"
+  - "https://ikman.lk/en/ads/talawatugoda/houses-for-sale"
+  - "https://ikman.lk/en/ads/kottawa/houses-for-sale"
 
 # Global price filter (applied when the URL doesn't already have price params)
 # Set to null to disable
 price_filter:
   min: 5000000    # Rs 5 million
-  max: 20000000    # Rs 20 million
+  max: 30000000    # Rs 30 million
 
 # Duplicate detection: minimum description similarity ratio (0.0 - 1.0)
 similarity_threshold: 0.9
@@ -23,7 +28,7 @@ similarity_threshold: 0.9
 request_delay: 1.5
 
 # Only scrape ads posted within the last N days (older ads are skipped)
-max_age_days: 14
+max_age_days: 30
 
 # Maximum pages to scrape per location (safety limit)
-max_pages: 20
+max_pages: 25
