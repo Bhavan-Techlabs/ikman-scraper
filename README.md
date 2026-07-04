@@ -1,6 +1,6 @@
-# ikman.lk Property Scraper
+# Sri Lanka House Sales Scraper
 
-A Python web scraper that extracts house-for-sale listings from [ikman.lk](https://ikman.lk/), Sri Lanka's largest marketplace, and writes structured data to Google Sheets. Supports multiple locations, price filtering, pagination, and intelligent duplicate detection.
+A Python web scraper that extracts house-for-sale listings from multiple Sri Lankan property sites ([ikman.lk](https://ikman.lk/), [lankapropertyweb.com](https://lankapropertyweb.com)) and writes structured data to Excel (.xlsx) and/or Google Sheets. Supports multiple locations, price filtering, pagination, and intelligent duplicate detection.
 
 ## Features
 
@@ -118,7 +118,7 @@ This project includes a GitHub Actions workflow that can run the scraper automat
 
 ### How it works
 
-The included `.github/workflows/scrape.yml` workflow runs the scraper every hour using a cron schedule. It can also be triggered manually from the **Actions** tab in your GitHub repository.
+The included `.github/workflows/scrape.yml` workflow runs the scraper every 24 hours using a cron schedule. It can also be triggered manually from the **Actions** tab in your GitHub repository.
 
 ### Setup
 
@@ -126,7 +126,7 @@ The included `.github/workflows/scrape.yml` workflow runs the scraper every hour
 2. Add two **repository secrets** under **Settings > Secrets and variables > Actions**:
    - `GOOGLE_CREDENTIALS` -- the full contents of your `credentials.json` file
    - `CONFIG_YAML` -- the full contents of your `config.yaml` file
-3. That's it -- the workflow will run automatically every hour
+3. That's it -- the workflow will run automatically every 24 hours
 
 You can also set the secrets via the CLI:
 
@@ -150,7 +150,7 @@ Edit the cron expression in `.github/workflows/scrape.yml`:
 ```yaml
 on:
   schedule:
-    - cron: '0 * * * *'    # Every hour
+    - cron: '0 0 * * *'    # Every 24 hours (midnight UTC)
     # - cron: '0 */6 * * *'  # Every 6 hours
     # - cron: '0 8 * * *'    # Daily at 8am UTC
 ```
@@ -188,7 +188,7 @@ urls:
 
 ```
 ├── .github/workflows/
-│   └── scrape.yml          # GitHub Actions workflow (hourly cron)
+│   └── scrape.yml          # GitHub Actions workflow (daily cron)
 ├── main.py                 # CLI entry point
 ├── scraper.py              # Page fetching, JSON extraction, pagination
 ├── data_processor.py       # Data normalization and row building

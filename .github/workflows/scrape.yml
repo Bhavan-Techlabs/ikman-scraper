@@ -2,7 +2,7 @@ name: Scrape Srilankan House Sales
 
 on:
   schedule:
-    - cron: '0 */12 * * *'  # Every 12 hours
+    - cron: '0 0 * * *'  # Every 24 hours
   workflow_dispatch:          # Allow manual trigger from GitHub UI
 
 jobs:
