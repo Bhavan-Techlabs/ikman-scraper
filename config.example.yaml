@@ -28,7 +28,7 @@ similarity_threshold: 0.9
 request_delay: 1.5
 
 # Only scrape ads posted within the last N days (older ads are skipped)
-max_age_days: 30
+max_age_days: 15
 
 # Maximum pages to scrape per location (safety limit)
-max_pages: 25
+max_pages: 20
