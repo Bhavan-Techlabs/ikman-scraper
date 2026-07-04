@@ -78,7 +78,10 @@ def build_row(listing, details, location_name):
         "Address": details.get("address", ""),
         "Description": details.get("description", ""),
         "URL": listing.get("ad_url", ""),
-        "Posted": _estimate_posted_date(listing.get("time_stamp", "")),
+        "Posted": (
+            _estimate_posted_date(listing.get("time_stamp", ""))
+            or details.get("posted_date", "")
+        ),
         "Date Scraped": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "Status": "",
         "Notes": "",

@@ -32,11 +32,13 @@ def extract_location_name(url):
     parsed = urlparse(url)
     path = parsed.path
 
-    # /forsale-LOCATION-all.html
+    # /forsale-LOCATION-all.html  e.g. Western_Piliyandala → Piliyandala, Ja+Ela → Ja Ela
     match = re.search(r"/forsale-(.+?)-all\.html", path)
     if match:
-        raw = match.group(1).replace("_", " ")
-        return raw.title()
+        raw = match.group(1).replace("_", " ").replace("+", " ").title()
+        # Drop leading region prefix (e.g. "Western ", "Central ", "Southern ")
+        raw = re.sub(r"^[A-Z][a-z]+ ", "", raw)
+        return raw
 
     # query param location=
     qs = parse_qs(parsed.query)
