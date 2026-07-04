@@ -9,8 +9,22 @@ spreadsheet_id: "1r-G0X1x3BwZfnFDG_R2KwOdnbNrs8nkL4FK-60_MYVQ"
 # Path to Google service account credentials JSON (only used for Sheets output)
 credentials_path: "credentials.json"
 
-# URLs to scrape — supports ikman.lk and lankapropertyweb.com
+# Reference list of all areas we want covered across all scrapers.
+# This is for tracking only — not read by the scraper code.
+# When adding a new area, add URLs for it in each supported website below.
+areas:
+  - Piliyandala   # ikman ✓  lankapropertyweb ✓  ceylonproperty ✓
+  - Ja-Ela        # ikman ✓  lankapropertyweb ✓  ceylonproperty ✓
+  - Kandy         # ikman ✓  lankapropertyweb ✓  ceylonproperty ✓
+  - Wattala       # ikman ✓  lankapropertyweb ✓  ceylonproperty ✓
+  - Dehiwala      # ikman ✓  lankapropertyweb ✓  ceylonproperty ✓
+  - Colombo       # ikman ✓  lankapropertyweb ✓  ceylonproperty ✓
+  - Talawatugoda  # ikman ✓  lankapropertyweb ✗  ceylonproperty ✓
+  - Kottawa       # ikman ✓  lankapropertyweb ✓  ceylonproperty ✓
+
+# URLs to scrape — supports ikman.lk, lankapropertyweb.com, and ceylonproperty.lk
 urls:
+  # ikman.lk
   - "https://ikman.lk/en/ads/piliyandala/houses-for-sale"
   - "https://ikman.lk/en/ads/ja-ela/houses-for-sale"
   - "https://ikman.lk/en/ads/kandy/houses-for-sale"
@@ -19,7 +33,24 @@ urls:
   - "https://ikman.lk/en/ads/colombo/houses-for-sale"
   - "https://ikman.lk/en/ads/talawatugoda/houses-for-sale"
   - "https://ikman.lk/en/ads/kottawa/houses-for-sale"
+  # lankapropertyweb.com/
   - "https://www.lankapropertyweb.com/forsale-Central_Kandy-all.html"
+  - "https://www.lankapropertyweb.com/forsale-Western_Piliyandala-all.html"
+  - "https://www.lankapropertyweb.com/forsale-Western_Dehiwala-all.html"
+  - "https://www.lankapropertyweb.com/forsale-Western_Kottawa-all.html"
+  - "https://www.lankapropertyweb.com/forsale-Western_Ja+Ela-all.html"
+  - "https://www.lankapropertyweb.com/forsale-Western_Wattala-all.html"
+  - "https://www.lankapropertyweb.com/forsale-Western_Colombo-all.html"
+  # ceylonproperty.lk
+  - "https://ceylonproperty.lk/sale?city=colombo"
+  - "https://ceylonproperty.lk/sale?city=piliyandala"
+  - "https://ceylonproperty.lk/sale?city=ja-ela"
+  - "https://ceylonproperty.lk/sale?city=kandy"
+  - "https://ceylonproperty.lk/sale?city=wattala"
+  - "https://ceylonproperty.lk/sale?city=dehiwala"
+  - "https://ceylonproperty.lk/sale?city=talawatugoda"
+  - "https://ceylonproperty.lk/sale?city=kottawa"
+
 
 # Global price filter (applied when the URL doesn't already have price params)
 # Set to null to disable

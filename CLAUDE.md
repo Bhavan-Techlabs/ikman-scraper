@@ -58,7 +58,7 @@ Config → output backend(s) init → per-location loop:
 - `"sheets"` — writes to Google Sheets (requires `credentials.json` and `spreadsheet_id`)
 - `"both"` — writes to both
 
-**Multi-site factory**: `scraper_factory.py` inspects the URL domain and routes to `scraper.py` (ikman.lk) or `scraper_lankapropertyweb.py` (lankapropertyweb.com). To add a new site, create a new `scraper_SITENAME.py` and add a domain check in the factory.
+**Multi-site factory**: `scraper_factory.py` inspects the URL domain and routes to `scraper.py` (ikman.lk), `scraper_lankapropertyweb.py` (lankapropertyweb.com), or `scraper_ceylonproperty.py` (ceylonproperty.lk). To add a new site, create a new `scraper_SITENAME.py` and add a domain check in the factory.
 
 **Pagination cutoff (ikman)**: Stops paginating when a page has no organic (non-promoted) ads newer than `max_age_days`.
 
