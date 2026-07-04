@@ -173,7 +173,10 @@ def get_ad_details(ad_url, request_delay=1.5):
         "bathrooms": prop_map.get("bathrooms", ""),
         "land_size": prop_map.get("land_size", ""),
         "house_size": prop_map.get("house_size", ""),
-        "address": prop_map.get("address", ad_data.get("location", "")),
+        "address": prop_map.get("address") or (
+            ad_data["location"]["name"] if isinstance(ad_data.get("location"), dict)
+            else ad_data.get("location", "")
+        ),
         "posted_date": (datetime.now() - timedelta(days=int(ad_data["postedDate"]))).strftime("%Y-%m-%d")
         if isinstance(ad_data.get("postedDate"), (int, float)) else ad_data.get("postedDate", ""),
     }

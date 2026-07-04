@@ -90,12 +90,13 @@ for site, url in TEST_URLS.items():
     logger.info("Row written. Key fields:")
     logger.info("  Title:    %s", row["Title"])
     logger.info("  Location: %s", row["Location"])
-    logger.info("  Price:    %s", row["Price"])
+    logger.info("  Price:    %s", row["Price (LKR)"])
     logger.info("  Posted:   %s", row["Posted"])
     logger.info("  Bedrooms: %s", row["Bedrooms"])
+    logger.info("  Land:     %s P  House: %s sqft", row["Land Size (Perches)"], row["House Size (SqFt)"])
     logger.info("  URL:      %s", row["URL"])
 
-    results[site] = {"status": "OK", "location_name": location_name, "title": row["Title"], "posted": row["Posted"]}
+    results[site] = {"status": "OK", "location_name": location_name, "title": row["Title"], "posted": row["Posted"], "price": row["Price (LKR)"]}
 
 logger.info("=" * 60)
 logger.info("RESULTS SUMMARY")
@@ -103,7 +104,7 @@ all_passed = True
 for site, r in results.items():
     status = r["status"]
     if status == "OK":
-        logger.info("  %-20s OK  — location=%s  posted=%s", site, r["location_name"], r["posted"])
+        logger.info("  %-20s OK  — location=%s  posted=%s  price=%s", site, r["location_name"], r["posted"], r.get("price"))
     else:
         logger.error("  %-20s FAIL — %s", site, r["error"])
         all_passed = False
