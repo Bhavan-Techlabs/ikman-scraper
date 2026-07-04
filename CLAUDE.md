@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Does
 
-Sri Lankan House Sales Scraper is a Python web scraper that extracts house-for-sale listings from multiple Sri Lankan property sites (ikman.lk, lankapropertyweb.com) and writes structured property data to Excel (.xlsx) and/or Google Sheets. It runs every 12 hours via GitHub Actions, which uploads the Excel file as a downloadable artifact.
+Sri Lankan House Sales Scraper is a Python web scraper that extracts house-for-sale listings from multiple Sri Lankan property sites (ikman.lk, lankapropertyweb.com, ceylonproperty.lk) and writes structured property data to Excel (.xlsx) and/or Google Sheets. It runs every 12 hours via GitHub Actions, which uploads the Excel file as a downloadable artifact.
 
 ## Setup
 
@@ -38,17 +38,19 @@ Config → output backend(s) init → per-location loop:
   factory dispatch → fetch listing pages → filter by price/age
   → fetch ad detail pages → deduplicate → build rows
   → append to Excel sheet tab and/or Google Sheets tab → sort & format
+  → rebuild Overview tab with value scores
 ```
 
 **Modules:**
 
 - `main.py` — CLI entry point; `process_location(url, config, excel_mod, spreadsheet)` drives the per-location loop
 - `scraper_factory.py` — factory that dispatches `get_listings`, `get_ad_details`, `extract_location_name` to the right scraper based on URL domain
-- `scraper.py` — ikman.lk scraper; HTTP fetching; extracts embedded `window.initialData` JSON; handles pagination and promoted-ad filtering
+- `scraper_ikman.py` — ikman.lk scraper; HTTP fetching; extracts embedded `window.initialData` JSON; handles pagination and promoted-ad filtering
 - `scraper_lankapropertyweb.py` — lankapropertyweb.com scraper; parses HTML with BeautifulSoup; handles pagination via URL query params
-- `data_processor.py` — normalizes scraped data into 14-column rows; `COLUMNS` defines the schema; converts relative timestamps to ISO dates
+- `scraper_ceylonproperty.py` — ceylonproperty.lk scraper; parses server-side rendered HTML with BeautifulSoup; handles pagination via URL query params
+- `data_processor.py` — normalizes scraped data into typed flat dicts matching `COLUMNS`; `compute_value_score` scores listings by price/land/house/beds/baths
 - `duplicate_detector.py` — `DuplicateDetector` class checks exact URL match first, then falls back to `difflib.SequenceMatcher` description similarity (threshold configurable, default 0.9)
-- `excel_writer.py` — writes/appends rows to `output/srilanka_house_sales_YYYY-MM-DD.xlsx`; one sheet tab per location; auto-column widths
+- `excel_writer.py` — writes/appends rows to `output/srilanka_house_sales_YYYY-MM-DD.xlsx`; one sheet tab per location; auto-column widths; typed cell storage; rebuilds an **Overview** tab after each write with value-scored listings sorted by score
 - `sheets.py` — Google Sheets API via service account; auto-creates tabs per location; auto-sorts by Posted date; auto-formats headers and row height
 
 ## Key Behaviors to Know
@@ -58,7 +60,7 @@ Config → output backend(s) init → per-location loop:
 - `"sheets"` — writes to Google Sheets (requires `credentials.json` and `spreadsheet_id`)
 - `"both"` — writes to both
 
-**Multi-site factory**: `scraper_factory.py` inspects the URL domain and routes to `scraper.py` (ikman.lk), `scraper_lankapropertyweb.py` (lankapropertyweb.com), or `scraper_ceylonproperty.py` (ceylonproperty.lk). To add a new site, create a new `scraper_SITENAME.py` and add a domain check in the factory.
+**Multi-site factory**: `scraper_factory.py` inspects the URL domain and routes to `scraper_ikman.py` (ikman.lk), `scraper_lankapropertyweb.py` (lankapropertyweb.com), or `scraper_ceylonproperty.py` (ceylonproperty.lk). To add a new site, create a new `scraper_SITENAME.py` and add a domain check in the factory.
 
 **Pagination cutoff (ikman)**: Stops paginating when a page has no organic (non-promoted) ads newer than `max_age_days`.
 
@@ -66,7 +68,11 @@ Config → output backend(s) init → per-location loop:
 
 **Duplicate detection**: Catches both exact URL matches and description similarity matches (cross-batch against existing data and intra-batch).
 
-**Sheet layout**: Each location gets its own worksheet tab named after the location. Status and Notes columns are user-editable and preserved across incremental runs.
+**Sheet layout**: Each location gets its own worksheet tab named after the location. Status and Notes columns are user-editable and preserved across incremental runs. An **Overview** tab is auto-rebuilt after every write with all listings ranked by value score.
+
+**Value score**: `compute_value_score` in `data_processor.py` combines price, land size (perches), house size (sqft), bedrooms, and bathrooms into a composite score used to rank listings in the Overview tab.
+
+**Public API of `excel_writer`**: `get_output_path()` (public alias for `_output_path`) and `get_existing_data(path, sheet_name)` are the two functions imported by `main.py`.
 
 ## GitHub Actions
 
@@ -78,12 +84,16 @@ Config → output backend(s) init → per-location loop:
 
 The job timeout is 180 minutes.
 
+## Repository
+
+GitHub: https://github.com/Bhavan-Techlabs/srilankan-property-scraper
+
 ## Configuration Reference (`config.yaml`)
 
 - `output_mode` — `"excel"` | `"sheets"` | `"both"` (default: `"excel"`)
 - `spreadsheet_id` — Google Sheets document ID (only needed for Sheets output)
 - `credentials_path` — path to service account JSON (default: `credentials.json`)
-- `urls` — list of property search URLs (ikman.lk or lankapropertyweb.com)
+- `urls` — list of property search URLs (ikman.lk, lankapropertyweb.com, or ceylonproperty.lk)
 - `price_filter.min` / `price_filter.max` — price filter in LKR
 - `max_age_days` — skip ads older than this (ikman.lk only)
 - `max_pages` — pagination limit per location

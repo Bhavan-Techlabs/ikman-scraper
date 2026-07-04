@@ -57,6 +57,9 @@ def _output_path():
     return os.path.join(OUTPUT_DIR, f"srilanka_house_sales_{date_str}.xlsx")
 
 
+get_output_path = _output_path
+
+
 def _get_or_create_workbook(path):
     if os.path.exists(path):
         return load_workbook(path)
