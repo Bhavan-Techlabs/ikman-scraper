@@ -1,6 +1,7 @@
 import re
 import logging
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ COLUMNS = [
     "Address",
     "Description",
     "URL",
+    "Source",
     "Posted",
     "Date Scraped",
     "Status",
@@ -135,8 +137,18 @@ def _estimate_posted_date(time_stamp):
     return posted.strftime("%Y-%m-%d")
 
 
+def _extract_domain(url):
+    """Return the bare domain (e.g. 'ikman.lk') from a URL string."""
+    try:
+        host = urlparse(url).netloc
+        return host.lstrip("www.") if host else ""
+    except Exception:
+        return ""
+
+
 def build_row(listing, details, location_name):
     """Combine listing summary and ad detail into a typed flat dict matching COLUMNS."""
+    ad_url = listing.get("ad_url", "")
     return {
         "Title": listing.get("title", ""),
         "Location": location_name,
@@ -147,7 +159,8 @@ def build_row(listing, details, location_name):
         "Price (LKR)": normalize_price(listing.get("price_numeric"), listing.get("price_raw", "")),
         "Address": details.get("address", ""),
         "Description": details.get("description", ""),
-        "URL": listing.get("ad_url", ""),
+        "URL": ad_url,
+        "Source": _extract_domain(ad_url),
         "Posted": (
             _estimate_posted_date(listing.get("time_stamp", ""))
             or details.get("posted_date", "")

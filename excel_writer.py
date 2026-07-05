@@ -44,6 +44,7 @@ _COL_WIDTHS = {
     "Address":                30,
     "Description":            50,
     "URL":                    20,
+    "Source":                 22,
     "Posted":                 12,
     "Date Scraped":           16,
     "Status":                 12,
@@ -197,6 +198,7 @@ _OV_COLUMNS = [
     "Score",
     "Title",
     "Location",
+    "Source",
     "Price (LKR)",
     "Land Size (Perches)",
     "House Size (SqFt)",
@@ -207,7 +209,7 @@ _OV_COLUMNS = [
 ]
 
 _OV_WIDTHS = {
-    "Rank": 6, "Score": 9, "Title": 40, "Location": 14,
+    "Rank": 6, "Score": 9, "Title": 40, "Location": 14, "Source": 22,
     "Price (LKR)": 18, "Land Size (Perches)": 18, "House Size (SqFt)": 16,
     "Bedrooms": 10, "Bathrooms": 10, "Value Insight": 55, "URL": 20,
 }
@@ -244,7 +246,8 @@ def _rebuild_overview(wb):
     ws_ov = wb.create_sheet(title=OVERVIEW_NAME, index=0)
 
     # --- Title banner ---
-    ws_ov.merge_cells("A1:K1")
+    _ov_span = f"A1:{get_column_letter(len(_OV_COLUMNS))}1"
+    ws_ov.merge_cells(_ov_span)
     banner = ws_ov["A1"]
     banner.value = "Sri Lanka House Sales — Value Overview"
     banner.font  = Font(bold=True, color="FFFFFF", size=13)
@@ -252,7 +255,8 @@ def _rebuild_overview(wb):
     banner.alignment = _CENTER
     ws_ov.row_dimensions[1].height = 28
 
-    ws_ov.merge_cells("A2:K2")
+    _ov_span2 = f"A2:{get_column_letter(len(_OV_COLUMNS))}2"
+    ws_ov.merge_cells(_ov_span2)
     sub = ws_ov["A2"]
     sub.value = (
         "Ranked by value score = (land sqft + built sqft + room bonus) ÷ price × 1M  |  "
@@ -282,16 +286,19 @@ def _rebuild_overview(wb):
         if sheet_name == OVERVIEW_NAME:
             continue
         ws_src = wb[sheet_name]
-        src_rows = list(ws_src.iter_rows(values_only=True))
-        if len(src_rows) <= 1:
+        src_rows_raw = list(ws_src.iter_rows(values_only=True))
+        if len(src_rows_raw) <= 1:
             continue
-        headers = src_rows[0]
+        headers = src_rows_raw[0]
         h = {name: i for i, name in enumerate(headers) if name}
 
-        for data_row in src_rows[1:]:
-            def _get(col_name):
+        # Also read cell objects so we can recover hyperlink URLs
+        src_rows_cells = list(ws_src.iter_rows(values_only=False))
+
+        for row_idx, data_row in enumerate(src_rows_raw[1:], 1):
+            def _get(col_name, _row=data_row):
                 idx = h.get(col_name)
-                return data_row[idx] if idx is not None else None
+                return _row[idx] if idx is not None else None
 
             price  = _get("Price (LKR)")
             land   = _get("Land Size (Perches)")
@@ -299,8 +306,20 @@ def _rebuild_overview(wb):
             beds   = _get("Bedrooms")
             baths  = _get("Bathrooms")
             title  = _get("Title") or ""
-            url    = _get("URL") or ""
             loc    = _get("Location") or sheet_name
+            source = _get("Source") or ""
+
+            # Recover the real URL — may have been replaced with "View Listing" text
+            url_idx = h.get("URL")
+            url = ""
+            if url_idx is not None:
+                cell_obj = src_rows_cells[row_idx][url_idx]
+                if cell_obj.hyperlink:
+                    url = cell_obj.hyperlink.target or ""
+                if not url:
+                    url = str(data_row[url_idx] or "")
+                if url == "View Listing":
+                    url = ""
 
             # Normalise — values may be stored as native numbers or legacy strings
             def _num(v):
@@ -325,6 +344,7 @@ def _rebuild_overview(wb):
                 "score": score,
                 "title": title,
                 "location": loc,
+                "source": source,
                 "price": price_n,
                 "land": land_n,
                 "house": house_n,
@@ -343,6 +363,7 @@ def _rebuild_overview(wb):
             r["score"],
             r["title"],
             r["location"],
+            r["source"],
             r["price"],
             r["land"],
             r["house"],
